@@ -1,0 +1,40 @@
+.form-calculator {
+    width: 60%;
+
+    display: flex;
+    flex-direction: column;
+
+    margin: 1.875rem 0;
+}
+
+.form-calculator label {
+    margin: 0 0 .75rem 0;
+
+    font-weight: 400;
+    color: var(--color-gray-1);
+}
+
+.form-calculator input {
+    height: 1.875rem;
+
+    border-radius: .3125rem;
+    border: 1px solid var(--color-gray-1);
+
+    margin-bottom: 1.5625rem;
+}
+
+.form-calculator input:focus {
+    outline: 1px solid var(--color-light-blue);
+}
+
+#installments {
+    margin-bottom: .3125rem;
+}
+
+.form-calculator span {
+    margin-bottom: 1.5625rem;
+
+    font-weight: 400;
+    font-size: .75rem;
+    color: var(--color-gray-1);
+}
