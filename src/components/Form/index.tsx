@@ -7,12 +7,13 @@ const Form = () => {
 
   return (
     <form action="" className="form-calculator">
-      <label htmlFor="amount">Informe o valor da venda *</label>
+      <label htmlFor="amount">Informe o valor da venda em reais *</label>
       <input
         type="text"
         id="amount"
+        placeholder="Ex.: 1200,00"
         onChange={(e) => {
-          setAmount(parseInt(e.target.value.split("R$ ")[1].replace(/[\D]+/g, "")));
+          setAmount(e.target.value);
         }}
       />
 
@@ -20,6 +21,7 @@ const Form = () => {
       <input
         type="text"
         id="installments"
+        placeholder="Ex.: 3"
         onChange={(e) => {
           setInstallments(e.target.value);
         }}
@@ -30,6 +32,7 @@ const Form = () => {
       <input
         type="text"
         id="mdr"
+        placeholder="Ex.: 4"
         onChange={(e) => {
           setMdr(e.target.value);
         }}
