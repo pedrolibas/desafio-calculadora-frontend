@@ -21,7 +21,6 @@ interface ListProvider {
   days: IResult;
   setDays: React.Dispatch<React.SetStateAction<IResult>>;
   formatValue: (value: number) => string;
-  error: string;
   amount: string | number;
 }
 
@@ -40,7 +39,6 @@ const CalculatorProvider = ({ children }: ProviderProps) => {
     value3: 30,
     value4: 90,
   } as IResult);
-  const [error, setError] = useState("");
 
   useEffect(() => {
     setResult({} as IResult);
@@ -127,7 +125,6 @@ const CalculatorProvider = ({ children }: ProviderProps) => {
         days,
         setDays,
         formatValue,
-        error,
         amount,
       }}
     >
