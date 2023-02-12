@@ -1,18 +1,16 @@
 import React, { createContext, ReactNode, useEffect, useState } from "react";
 import { calculatorApi } from "../services/api";
+import toast from "react-hot-toast";
 
 interface ProviderProps {
   children: ReactNode;
 }
 
 interface IResult {
-  1: number | undefined;
-  15: number | undefined;
-  30: number | undefined;
-  45: number | undefined;
-  60: number | undefined;
-  75: number | undefined;
-  90: number | undefined;
+  value1: number;
+  value2: number;
+  value3: number;
+  value4: number;
 }
 
 interface ListProvider {
@@ -20,10 +18,11 @@ interface ListProvider {
   setInstallments: React.Dispatch<React.SetStateAction<string>>;
   setMdr: React.Dispatch<React.SetStateAction<string>>;
   result: IResult;
-  manipulateDays: (num: number) => void;
-  days: number[];
+  days: IResult;
+  setDays: React.Dispatch<React.SetStateAction<IResult>>;
   formatValue: (value: number) => string;
   error: string;
+  amount: string | number;
 }
 
 export const CalculatorContext = createContext<ListProvider>(
@@ -35,22 +34,44 @@ const CalculatorProvider = ({ children }: ProviderProps) => {
   const [installments, setInstallments] = useState("");
   const [mdr, setMdr] = useState("");
   const [result, setResult] = useState<IResult>({} as IResult);
-  const [days, setDays] = useState<number[]>([]);
+  const [days, setDays] = useState<IResult>({
+    value1: 1,
+    value2: 15,
+    value3: 30,
+    value4: 90,
+  } as IResult);
   const [error, setError] = useState("");
 
   useEffect(() => {
     setResult({} as IResult);
-    if (amount != "" && installments != "" && mdr != "" && days.length != 0) {
-      calculatorApi
-        .post("", { amount: parseInt(amount) * 100, installments, mdr, days })
-        .then((res) => {
-          setResult(res.data);
-          setError("");
-        })
-        .catch((err) => {
-          setResult({} as IResult);
-          setError("Verique se os valores informados estão corretos!");
-        });
+    if (amount != "" && installments != "" && mdr != "") {
+      const newDays = manipulateDays(days);
+
+      const replaceAmount = amount.replace(".", "").replace(",", ".");
+      let newAmount: number = parseFloat(replaceAmount);
+      newAmount = Math.round(newAmount * 100);
+
+      if (validatedData(newAmount)) {
+        calculatorApi
+          .post("", {
+            amount: newAmount,
+            installments,
+            mdr,
+            days: newDays,
+          })
+          .then((res) => {
+            setResult({
+              value1: res.data[days.value1],
+              value2: res.data[days.value2],
+              value3: res.data[days.value3],
+              value4: res.data[days.value4],
+            });
+          })
+          .catch((err) => {
+            setResult({} as IResult);
+            toast.error(err.message)
+          });
+      }
     }
   }, [amount, installments, mdr, days]);
 
@@ -60,13 +81,40 @@ const CalculatorProvider = ({ children }: ProviderProps) => {
       currency: "BRL",
     }).format(value);
 
-  const manipulateDays = (num: number) => {
-    if (days.find((number) => number === num)) {
-      setDays(days.filter((number) => number != num));
-      return;
+  const manipulateDays = (days: IResult) => {
+    const newDays: number[] = [];
+    Object.values(days).forEach((day) => {
+      if (day > 0) {
+        newDays.push(day);
+      }
+    });
+
+    return newDays;
+  };
+
+  const validatedData = (amount: number) => {
+    if (Number.isNaN(parseInt(installments))) {
+      toast.error("O campo parcelas deve ser um número!");
+      return false;
+    }
+    if (Number.isNaN(parseInt(mdr))) {
+      toast.error("O campo de MDR deve ser um número!");
+      return false;
+    }
+    if (amount < 1000) {
+      toast.error("O valor de venda deve ser maior ou igual a 10!");
+      return false;
+    }
+    if (parseInt(installments) > 12 || parseInt(installments) < 1) {
+      toast.error("O valor de parcelas deve ser entre 1 e 12!");
+      return false;
+    }
+    if (parseInt(mdr) > 100) {
+      toast.error("O valor de MDR deve ser menor que 100!");
+      return false;
     }
 
-    setDays([...days, num]);
+    return true;
   };
 
   return (
@@ -76,10 +124,11 @@ const CalculatorProvider = ({ children }: ProviderProps) => {
         setInstallments,
         setMdr,
         result,
-        manipulateDays,
         days,
+        setDays,
         formatValue,
         error,
+        amount,
       }}
     >
       {children}

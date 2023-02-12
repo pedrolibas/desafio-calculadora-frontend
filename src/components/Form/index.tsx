@@ -3,7 +3,23 @@ import { CalculatorContext } from "../../contexts/CalculatorContext";
 import "./styles.css";
 
 const Form = () => {
-  const { setAmount, setInstallments, setMdr } = useContext(CalculatorContext);
+  const { amount, setAmount, setInstallments, setMdr } =
+    useContext(CalculatorContext);
+
+  const formatValue = (value: string | number) => {
+    value = value + "";
+    value = parseInt(value.replace(/[\D]+/g, ""));
+    value = value + "";
+    value = value.replace(/([0-9]{2})$/g, ",$1");
+
+    if (value.length > 6) {
+      value = value.replace(/([0-9]{3}),([0-9]{2}$)/g, ".$1,$2");
+    }
+
+    setAmount(value);
+
+    if (value == "NaN") setAmount("");
+  };
 
   return (
     <form action="" className="form-calculator">
@@ -12,8 +28,9 @@ const Form = () => {
         type="text"
         id="amount"
         placeholder="Ex.: 1200,00"
+        value={amount}
         onChange={(e) => {
-          setAmount(e.target.value);
+          formatValue(e.target.value);
         }}
       />
 
